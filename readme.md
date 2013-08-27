@@ -23,27 +23,28 @@ This is a good time to define the various components:
 * [PublishAdapter](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/SubscribeAdapter.java) - The PubNub adapter which consumes messages from RabbitMQ and then publishes messages to PubNub.
 
 You can see the following workflow in [this diagram](https://github.com/pubnub/rabbitmq/tree/master/docs/RabbitMQ-Adapter-Workflow.pdf) 
-* Backend Server Publishes to PubNub through RabbitMQ:
-1. Producer ------>Produces Message ------> RabbitMQ
-2. RabbitMQ ------> Distributes Message ------> PublishAdapter
-3. PublishAdapter ------>Publishes Message------> PubNub
 
-* Backend Server Subscribes to PubNub through RabbitMQ:
+Backend Server Publishes to PubNub through RabbitMQ:
+1. Producer ------> Produces Message ------> RabbitMQ
+2. RabbitMQ ------> Distributes Message ------> PublishAdapter
+3. PublishAdapter ------> Publishes Message------> PubNub
+
+Backend Server Subscribes to PubNub through RabbitMQ:
 1. SubscribeAdapter <------Subscribes to Message <------ PubNub
 2. RabbitMQ <------Produces Message <----- SubscribeAdapter
 3. Consumer <------Distributes Message <------ RabbitMQ
 
 #Getting Started
-* Initialize environment
+Initialize environment
 1. Start RabbitMQ Server
-	> rabbitmq-server
+	\> rabbitmq-server
 2. Start PubNub-RabbitMQ adapters in their own terminals from the directory you used for the RabbitMQ tutorials 
-	> java -cp "./*" com.pubnub.examples.SubscribeAdapter
-	> java -cp "./*" com.pubnub.examples.PublishAdapter 
+	\> java -cp "./*" com.pubnub.examples.SubscribeAdapter
+	\> java -cp "./*" com.pubnub.examples.PublishAdapter 
 
-* Receive Message on Backend Server from Client in the Cloud
+Receive Message on Backend Server from Client in the Cloud
 1. Start the RabbitMQ message consumer
-	> java -cp "./*" com.pubnub.examples.Consumer
+	\> java -cp "./*" com.pubnub.examples.Consumer
 2. Publish a message on the [PubNub Dev Console](http://www.pubnub.com/console) on channel 'rabbitWorker' using publish key 'demo'
 3. Go to the SubscribeAdapter terminal and confirm that the adapter successfully subscribes to the message from PubNuib and then produces the message successfully to RabbitMQ
 4. Go to the Consumer terminal and confirm that the backend server consumed the message successfully from RabbitMQ
@@ -51,10 +52,10 @@ You can see the following workflow in [this diagram](https://github.com/pubnub/r
 6. Optionally, try closing the RabbitMQ message consumer from Step 1 and performing steps 2 through 5.  Then at some point perform step 1 to see how messages can still be successfully delivered even in the case of availability issues with your back-end servers.
 7. Optionally, try opening up several RabbitMQ message consumers to see how RabbitMQ can distribute the workload across several backend servers
 
- * Receive Message on Client in the Cloud from Backend Server
+Receive Message on Client in the Cloud from Backend Server
 1. Open the [PubNub Dev Console](http://www.pubnub.com/console) and subscribe to channel 'rabbitWorker' using subscribe key 'demo' 
 2. Start the RabbitMQ message producer
-	> java -cp "./*" com.pubnub.examples.Producer hello world from RabbitMQ!
+	\> java -cp "./*" com.pubnub.examples.Producer hello world from RabbitMQ!
 3. Go to the PublishAdapter terminal and confirm that the adapter consumes the message successfully from RabbitMQ and publishes the message successfully to PubNub
 4. view the message on the [PubNub Dev Console](http://www.pubnub.com/console)
 5. (Optionally) Leave the SubscribeAdapter and Consumer classes running and go to those terminals to confirm that the same message sent to PubNub was also delivered all the way back fown to the Consumer
