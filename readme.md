@@ -17,54 +17,55 @@ The adapters connect the RabbitMQ queue/exchange with PubNub.  One adapter will 
 
 This is a good time to define the various components:
 * RabbitMQ - The middleware layer incorporating the message exchange and queue to handle delivery of messages.  The message exchange/broker/queue are all referred to together as RabbitMQ for the purposes of this demo
-* [ProducerClient](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/ProducerClient.java) - The backend server which produces messages to RabbitMQ.  This modifies [NewTask.java[(https://github.com/rabbitmq/rabbitmq-tutorials/blob/master/java/NewTask.java) from the RabbitMQ tutorial two java by changing the RabbitMQ channel name defined in the variable \cf2 TASK_QUEUE_NAME.  
-* [ConsumerClient](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/ConsumerClient.java) - The backend server which consumes messages from RabbitMQ.  This modifies [Worker.java[(https://github.com/rabbitmq/rabbitmq-tutorials/blob/master/java/NewTask.java) from the RabbitMQ tutorial two java by changing the RabbitMQ channel name defined in the variable TASK_QUEUE_NAME.  
-* [ProducerServer](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/ProducerServer.java) - The PubNub adapter which subscribes to messages from PubNub and produces messages to RabbitMQ.
-* [ConsumerServer](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/ProducerServer.java) - The PubNub adapter which consumes messages from RabbitMQ and then publishes messages to PubNub.
+* [Producer](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/Producer.java) - The backend server which produces messages to RabbitMQ.  This modifies [NewTask.java[(https://github.com/rabbitmq/rabbitmq-tutorials/blob/master/java/NewTask.java) from the RabbitMQ tutorial two java by changing the RabbitMQ channel name defined in the variable TASK_QUEUE_NAME.  
+* [Consumer](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/Consumer.java) - The backend server which consumes messages from RabbitMQ.  This modifies [Worker.java[(https://github.com/rabbitmq/rabbitmq-tutorials/blob/master/java/NewTask.java) from the RabbitMQ tutorial two java by changing the RabbitMQ channel name defined in the variable TASK_QUEUE_NAME.  
+* [SubscribeAdapter](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/SubscribeAdapter.java) - The PubNub adapter which subscribes to messages from PubNub and produces messages to RabbitMQ.
+* [PublishAdapter](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/SubscribeAdapter.java) - The PubNub adapter which consumes messages from RabbitMQ and then publishes messages to PubNub.
 
 You can see the following workflow in [this diagram](https://github.com/pubnub/rabbitmq/tree/master/docs/RabbitMQ-Adapter-Workflow.pdf) 
 * Backend Server Publishes to PubNub through RabbitMQ:
-1) ProducerClient ------>Produces Message ------> RabbitMQ
-2) RabbitMQ ------> Distributes Message ------> ConsumerServer
-3) ConsumerServer ------>Publishes Message------> PubNub
+1. Producer ------>Produces Message ------> RabbitMQ
+2. RabbitMQ ------> Distributes Message ------> PublishAdapter
+3. PublishAdapter ------>Publishes Message------> PubNub
 
-* Backend Server Subscribes to PubNub through RabbitMQ
-1) ProducerServer <------Subscribes to Message <------ PubNub
-2) RabbitMQ <------Produces Message <----- ProducerServer
-3) ConsumerClient <------Distributes Message <------ RabbitMQ
+* Backend Server Subscribes to PubNub through RabbitMQ:
+1. SubscribeAdapter <------Subscribes to Message <------ PubNub
+2. RabbitMQ <------Produces Message <----- SubscribeAdapter
+3. Consumer <------Distributes Message <------ RabbitMQ
 
 #Getting Started
 * Initialize environment
-1) Start RabbitMQ Server
+1. Start RabbitMQ Server
 	> rabbitmq-server
-2) Start PubNub-RabbitMQ adapters in their own terminals from the directory you used for the RabbitMQ tutorials 
-	> java -cp "./*" com.pubnub.examples.ProducerServer
-	> java -cp "./*" com.pubnub.examples.ConsumerServer 
+2. Start PubNub-RabbitMQ adapters in their own terminals from the directory you used for the RabbitMQ tutorials 
+	> java -cp "./*" com.pubnub.examples.SubscribeAdapter
+	> java -cp "./*" com.pubnub.examples.PublishAdapter 
 
 * Receive Message on Backend Server from Client in the Cloud
-1) Start the RabbitMQ message consumer
-	> java -cp "./*" com.pubnub.examples.ConsumerClient
-2) Publish a message on the [PubNub Dev Console](http://www.pubnub.com/console) on channel 'rabbitWorker' using publish key 'demo'
-3) Go to the ProducerServer terminal and confirm that the adapter successfully subscribes to the message from PubNuib and then produces the message successfully to RabbitMQ
-4) Go to the ConsumerClient terminal and confirm that the backend server consumed the message successfully from RabbitMQ
-5) Rinse, Lather, Repeat.
-6) Optionally, try closing the RabbitMQ message consumer from Step 1 and performing steps 2 through 5.  Then at some point perform step 1 to see how messages can still be successfully delivered even in the case of availability issues with your back-end servers.
-7) Optionally, try opening up several RabbitMQ message consumers to see how RabbitMQ can distribute the workload across several backend servers
+1. Start the RabbitMQ message consumer
+	> java -cp "./*" com.pubnub.examples.Consumer
+2. Publish a message on the [PubNub Dev Console](http://www.pubnub.com/console) on channel 'rabbitWorker' using publish key 'demo'
+3. Go to the SubscribeAdapter terminal and confirm that the adapter successfully subscribes to the message from PubNuib and then produces the message successfully to RabbitMQ
+4. Go to the Consumer terminal and confirm that the backend server consumed the message successfully from RabbitMQ
+5. Rinse, Lather, Repeat.
+6. Optionally, try closing the RabbitMQ message consumer from Step 1 and performing steps 2 through 5.  Then at some point perform step 1 to see how messages can still be successfully delivered even in the case of availability issues with your back-end servers.
+7. Optionally, try opening up several RabbitMQ message consumers to see how RabbitMQ can distribute the workload across several backend servers
 
  * Receive Message on Client in the Cloud from Backend Server
-1) Open the [PubNub Dev Console](http://www.pubnub.com/console) and subscribe to channel 'rabbitWorker' using subscribe key 'demo' 
-2) Start the RabbitMQ message producer
-	> java -cp "./*" com.pubnub.examples.ProducerClient hello world from RabbitMQ!
-3) Go to the ConsumerServer terminal and confirm that the adapter consumes the message successfully from RabbitMQ and publishes the message successfully to PubNub
-4) view the message on the [PubNub Dev Console](http://www.pubnub.com/console)
- 
+1. Open the [PubNub Dev Console](http://www.pubnub.com/console) and subscribe to channel 'rabbitWorker' using subscribe key 'demo' 
+2. Start the RabbitMQ message producer
+	> java -cp "./*" com.pubnub.examples.Producer hello world from RabbitMQ!
+3. Go to the PublishAdapter terminal and confirm that the adapter consumes the message successfully from RabbitMQ and publishes the message successfully to PubNub
+4. view the message on the [PubNub Dev Console](http://www.pubnub.com/console)
+5. (Optionally) Leave the SubscribeAdapter and Consumer classes running and go to those terminals to confirm that the same message sent to PubNub was also delivered all the way back fown to the Consumer
+
 #License
 PubNub
 
-	The MIT License (MIT)Copyright (c) 2013 PubNub
-	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+	The MIT License (MIT)Copyright (c) 2013 PubNub Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+	
 	The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
+	
 	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 * RabbitMQ

@@ -11,16 +11,16 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.MessageProperties;
 import com.pubnub.api.*;
 
-public class ProducerServer {
+public class SubscribeAdapter {
 
-	//messages subscribed from PubNub by producerServer for consumerClient to consumePubNub
+	//messages subscribed from PubNub by SubscribeAdapter for consumerClient to consumePubNub
 	private static final String TASK_QUEUE_NAME = "task_queue_inbound_durable";
     static Pubnub pubnub;
     private static final String publish_key = "demo";
     private static final String subscribe_key = "demo";
     String channelPubNub = "rabbitWorker";
     
-    public ProducerServer() {
+    public SubscribeAdapter() {
     	//TODO initialize constructor
     }
 
@@ -34,11 +34,11 @@ public class ProducerServer {
             channelRabbitMQ.basicPublish( "", TASK_QUEUE_NAME,
                     MessageProperties.PERSISTENT_TEXT_PLAIN,
                     message.toString().getBytes());
-            System.out.println(" [x] producerServer produced to " + 
+            System.out.println(" [x] SubscribeAdapter produced to " + 
                     TASK_QUEUE_NAME + " '" + message.toString() + "'");
         }
         catch (Exception e){
-        	System.out.println(" [!] producerServer error" + e);
+        	System.out.println(" [!] SubscribeAdapter error" + e);
         }
 	    
 	}
@@ -47,33 +47,33 @@ public class ProducerServer {
     	Callback cbSubscribe = new Callback(){
             @Override
             public void connectCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] producerServer SUBSCRIBE : CONNECT on channel:" + channelPubNub
+                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : CONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             @Override
             public void disconnectCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] producerServer SUBSCRIBE : DISCONNECT on channel:" + channelPubNub
+                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : DISCONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             public void reconnectCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] producerServer SUBSCRIBE : RECONNECT on channel:" + channelPubNub
+                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : RECONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             @Override
             public void successCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] producerServer SUBSCRIBE : " + channelPubNub + " : "
+                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : " + channelPubNub + " : "
                            + message.getClass() + " : " + message.toString(), channelRabbitMQ);
             }
 
             @Override
             public void errorCallback(String channelPubNub, PubnubError error) {
-                notifyUser(" [!] producerServer SUBSCRIBE : ERROR on channel " + channelPubNub
+                notifyUser(" [!] SubscribeAdapter SUBSCRIBE : ERROR on channel " + channelPubNub
                            + " : " + error.toString());
             }
     	};
@@ -81,12 +81,12 @@ public class ProducerServer {
         try {
         	pubnub.subscribe(channelPubNub, cbSubscribe);
         } catch (Exception e) {
-        	notifyUser(" [!] producerServer SUBSCRIBE : ERROR on channel " + channelPubNub
+        	notifyUser(" [!] SubscribeAdapter SUBSCRIBE : ERROR on channel " + channelPubNub
                     + " : " + e.toString());
         }
     }
     
-    public void startProducerServer() throws Exception {
+    public void startSubscribeAdapter() throws Exception {
     	pubnub = new Pubnub(publish_key, subscribe_key);	
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
@@ -100,7 +100,7 @@ public class ProducerServer {
 
 
     public static void main(String[] argv) throws Exception {
-    	ProducerServer ps = new ProducerServer();
-    	ps.startProducerServer();
+    	SubscribeAdapter ps = new SubscribeAdapter();
+    	ps.startSubscribeAdapter();
     }
 }

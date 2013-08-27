@@ -16,9 +16,9 @@ import com.rabbitmq.client.QueueingConsumer;
  * such as 'task_queue_inbound_durable'
 */
 
-public class ConsumerClient {
+public class Consumer {
 
-	//messages subscribed from PubNub by producerServer for consumerClient to consumePubNub
+	//messages subscribed from PubNub by producerServer for Consumer to consumePubNub
 	private static final String TASK_QUEUE_NAME = "task_queue_inbound_durable";
     
     public static void main(String[] argv) throws Exception {
@@ -32,7 +32,7 @@ public class ConsumerClient {
         boolean durable = true;
 
         channel.queueDeclare(TASK_QUEUE_NAME, durable, false, false, null);
-        System.out.println(" [*]  consumerClient waiting for messages. To exit press CTRL+C");
+        System.out.println(" [*] Consumer waiting for messages. To exit press CTRL+C");
 
         //dispatch messages fairly rather than round-robin by waiting for ack before sending next message
         //be careful because queue can fill up if all workers are busy
@@ -48,7 +48,7 @@ public class ConsumerClient {
           QueueingConsumer.Delivery delivery = consumer.nextDelivery();
           String message = new String(delivery.getBody());
           
-          System.out.println(" [x] consumerClient received '" + message + "'");
+          System.out.println(" [x] Consumer received '" + message + "'");
           doWork(message);
 
           channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);

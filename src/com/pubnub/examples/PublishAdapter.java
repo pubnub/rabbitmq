@@ -7,8 +7,8 @@ import com.rabbitmq.client.QueueingConsumer;
 
 import com.pubnub.api.*;
 
-public class ConsumerServer {
-	//messages produced by producerClient for consumerServer to publish to PubNub
+public class PublishAdapter {
+	//messages produced by producerClient for PublishAdapter to publish to PubNub
     private static final String TASK_QUEUE_NAME = "task_queue_outbound_durable";
     private static final String publish_key = "demo";
     private static final String subscribe_key = "demo";
@@ -18,11 +18,11 @@ public class ConsumerServer {
     	Callback cb = new Callback(){
             @Override
             public void successCallback(String channel, Object message) {
-                System.out.println(" [*] consumerServer : " + message);
+                System.out.println(" [*] PublishAdapter : " + message);
             }
             @Override
             public void errorCallback(String channel, PubnubError error) {
-            	System.out.println(" [!] consumerServer error:" + error);
+            	System.out.println(" [!] PublishAdapter error:" + error);
             }
     	};
     	Pubnub pubnub = new Pubnub(publish_key, subscribe_key);
@@ -33,7 +33,7 @@ public class ConsumerServer {
         //configure message queues as durable
         boolean durable = true;
         channel.queueDeclare(TASK_QUEUE_NAME, durable, false, false, null);
-        System.out.println(" [*] consumerServer waiting for messages. To exit press CTRL+C");
+        System.out.println(" [*] PublishAdapter waiting for messages. To exit press CTRL+C");
         //dispatch messages fairly rather than round-robin by waitng for ack before sending next message
         //be careful because queue can fill up if all workers are busy
         int prefetchCount = 1;
@@ -45,7 +45,7 @@ public class ConsumerServer {
         while (true) {
           QueueingConsumer.Delivery delivery = consumer.nextDelivery();
           String message = new String(delivery.getBody());    
-          System.out.println(" [x] consumerServer received '" + message + "'");
+          System.out.println(" [x] PublishAdapter received '" + message + "'");
           pubnub.publish(channelName, message, cb);
           channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }

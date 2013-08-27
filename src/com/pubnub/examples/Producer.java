@@ -16,7 +16,7 @@ import com.rabbitmq.client.MessageProperties;
  * such as 'task_queue_outbound_durable'
 */
 
-public class ProducerClient {
+public class Producer {
 
   private static final String TASK_QUEUE_NAME = "task_queue_outbound_durable";
 
@@ -34,7 +34,7 @@ public class ProducerClient {
     channel.basicPublish( "", TASK_QUEUE_NAME,
                 MessageProperties.PERSISTENT_TEXT_PLAIN,
                 message.getBytes());
-    System.out.println(" [x] producerClient sent '" + message + "'");
+    System.out.println(" [x] Producer sent '" + message + "'");
 
     channel.close();
     connection.close();
@@ -42,7 +42,7 @@ public class ProducerClient {
 
   private static String getMessage(String[] strings){
     if (strings.length < 1)
-      return "{\"text\":\"hello world!\"}";
+      return "hello world wide clients!";
     return joinStrings(strings, " ");
   }
 
