@@ -18,7 +18,7 @@ import com.rabbitmq.client.MessageProperties;
 
 public class ProducerClient {
 
-	private static final String TASK_QUEUE_NAME = "task_queue_outbound_durable";
+  private static final String TASK_QUEUE_NAME = "task_queue_outbound_durable";
 
   public static void main(String[] argv) throws Exception {
 
@@ -42,7 +42,7 @@ public class ProducerClient {
 
   private static String getMessage(String[] strings){
     if (strings.length < 1)
-      return "Hello World!";
+      return "{\"text\":\"hello world!\"}";
     return joinStrings(strings, " ");
   }
 

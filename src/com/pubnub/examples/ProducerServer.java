@@ -36,7 +36,6 @@ public class ProducerServer {
                     message.toString().getBytes());
             System.out.println(" [x] producerServer produced to " + 
                     TASK_QUEUE_NAME + " '" + message.toString() + "'");
-            doWork(message.toString());
         }
         catch (Exception e){
         	System.out.println(" [!] producerServer error" + e);
@@ -74,21 +73,6 @@ public class ProducerServer {
 
             @Override
             public void errorCallback(String channelPubNub, PubnubError error) {
-
-                /*
-
-                # Switch on error code, see PubnubError.java
-
-                if (error.errorCode == 112) {
-                    # Bad Auth Key!
-                    unsubscribe, get a new auth key, subscribe, etc...
-                } else if (error.errorCode == 113) {
-                    # Need to set Auth Key !
-                    unsubscribe, set auth, resubscribe
-                }
-
-                */
-
                 notifyUser(" [!] producerServer SUBSCRIBE : ERROR on channel " + channelPubNub
                            + " : " + error.toString());
             }
@@ -97,34 +81,22 @@ public class ProducerServer {
         try {
         	pubnub.subscribe(channelPubNub, cbSubscribe);
         } catch (Exception e) {
+        	notifyUser(" [!] producerServer SUBSCRIBE : ERROR on channel " + channelPubNub
+                    + " : " + e.toString());
         }
     }
     
     public void startProducerServer() throws Exception {
-    	pubnub = new Pubnub(publish_key, subscribe_key);
-    	
+    	pubnub = new Pubnub(publish_key, subscribe_key);	
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
         final Channel channelRabbitMQ = connection.createChannel();
-
         //configure message queues as durable
         boolean durable = true;
-
         channelRabbitMQ.queueDeclare(TASK_QUEUE_NAME, durable, false, false, null);
-
         subscribe(channelPubNub, channelRabbitMQ);
-        
-        //let's keep the RabbitMQ channel open indefinitely
-        //channelRabbitMQ.close();
-        //connection.close();
     }
-    
-	private static void doWork(String task) throws InterruptedException {
-        for (char ch: task.toCharArray()) {
-          if (ch == '.') Thread.sleep(1000);
-        }
-      }
 
 
     public static void main(String[] argv) throws Exception {
