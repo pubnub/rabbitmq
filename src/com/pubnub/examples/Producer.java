@@ -34,7 +34,7 @@ public class Producer {
     channel.basicPublish( "", TASK_QUEUE_NAME,
                 MessageProperties.PERSISTENT_TEXT_PLAIN,
                 message.getBytes());
-    System.out.println(" [x] Producer sent '" + message + "'");
+    System.out.println(" [x] Producer : sent '" + message + "'");
 
     channel.close();
     connection.close();

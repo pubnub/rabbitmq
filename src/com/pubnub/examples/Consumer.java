@@ -32,7 +32,7 @@ public class Consumer {
         boolean durable = true;
 
         channel.queueDeclare(TASK_QUEUE_NAME, durable, false, false, null);
-        System.out.println(" [*] Consumer waiting for messages. To exit press CTRL+C");
+        System.out.println(" [*] Consumer : waiting for messages. To exit press CTRL+C");
 
         //dispatch messages fairly rather than round-robin by waiting for ack before sending next message
         //be careful because queue can fill up if all workers are busy
@@ -48,7 +48,7 @@ public class Consumer {
           QueueingConsumer.Delivery delivery = consumer.nextDelivery();
           String message = new String(delivery.getBody());
           
-          System.out.println(" [x] Consumer received '" + message + "'");
+          System.out.println(" [x] Consumer : received '" + message + "'");
           doWork(message);
 
           channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);

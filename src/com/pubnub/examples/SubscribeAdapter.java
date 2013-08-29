@@ -22,24 +22,24 @@ public class SubscribeAdapter {
     }
 
     private void Produce (Object message, final Channel channelRabbitMQ){
-		System.out.println(" [*] SubscribeAdapter : PRODUCE : inspecting message : " + message);
+		System.out.println(" [*] SubscribeAdapter : PRODUCE : inspecting message " + message);
     	try {
     		//for this demo, we will produce a message to RabbitMQ onbly if we received a valid number in the Amount element of the JSON message from PubNub
     		JSONObject jsobj = new JSONObject(message.toString());
     		if (jsobj.getDouble("Amount") >= 0 ){
-    			System.out.println(" [*] SubscribeAdapter : PRODUCE : Amount is a valid positive number : " + jsobj.getDouble("Amount"));
+    			System.out.println(" [*] SubscribeAdapter : PRODUCE : verified Amount: " + jsobj.getDouble("Amount"));
     			jsobj.append("Verifier", "SubscribeAdapter");
     			channelRabbitMQ.basicPublish( "", TASK_QUEUE_NAME,
                         MessageProperties.PERSISTENT_TEXT_PLAIN,
                         jsobj.toString().getBytes());
-                System.out.println(" [+] SubscribeAdapter produced to " + 
+                System.out.println(" [+] SubscribeAdapter : PRODUCE : produced to " + 
                         TASK_QUEUE_NAME + " '" + jsobj.toString() + "'");
     		}
     		else{
-    			System.out.println(" [-] SubscribeAdapter : PRODUCE : invalid Amount element in message : " + message);
+    			System.out.println(" [-] SubscribeAdapter : PRODUCE : discarding due to invalid Amount in " + message);
     		}
     	} catch (Exception e) {
-    		System.out.println(" [!] SubscribeAdapter : PRODUCE : exception: " + e);
+    		System.out.println(" [!] SubscribeAdapter : PRODUCE : discarding message due to exception: " + e);
     	}
     }
 	
@@ -47,27 +47,27 @@ public class SubscribeAdapter {
     	Callback cbSubscribe = new Callback(){
             @Override
             public void connectCallback(String channelPubNub, Object message) {
-            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : CONNECT on channel:" + channelPubNub
+            	System.out.println(" [*] SubscribeAdapter : SUBSCRIBE : CONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             @Override
             public void disconnectCallback(String channelPubNub, Object message) {
-            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : DISCONNECT on channel:" + channelPubNub
+            	System.out.println(" [*] SubscribeAdapter : SUBSCRIBE : DISCONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             public void reconnectCallback(String channelPubNub, Object message) {
-            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : RECONNECT on channel:" + channelPubNub
+            	System.out.println(" [*] SubscribeAdapter : SUBSCRIBE : RECONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             @Override
             public void successCallback(String channelPubNub, Object message) {
-            	System.out.println(" [x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:" + channelPubNub
+            	System.out.println(" [x] SubscribeAdapter : SUBSCRIBE : RECEIVED on channel:" + channelPubNub
                         + " : " + message.getClass() + " : "
                         + message.toString());
                 Produce(message, channelRabbitMQ);
@@ -75,7 +75,7 @@ public class SubscribeAdapter {
 
             @Override
             public void errorCallback(String channelPubNub, PubnubError error) {
-            	System.out.println(" [!] SubscribeAdapter SUBSCRIBE : ERROR on channel " + channelPubNub
+            	System.out.println(" [!] SubscribeAdapter : SUBSCRIBE : ERROR on channel " + channelPubNub
                            + " : " + error.toString());
             }
     	};

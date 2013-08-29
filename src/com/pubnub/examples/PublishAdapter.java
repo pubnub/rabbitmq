@@ -36,8 +36,8 @@ public class PublishAdapter {
         //configure message queues as durable
         boolean durable = true;
         channel.queueDeclare(TASK_QUEUE_NAME, durable, false, false, null);
-        System.out.println(" [*] PublishAdapter waiting for messages. To exit press CTRL+C");
-        //dispatch messages fairly rather than round-robin by waitng for ack before sending next message
+        System.out.println(" [*] PublishAdapter : waiting for messages. To exit press CTRL+C");
+        //dispatch messages fairly rather than round-robin by waiting for ack before sending next message
         //be careful because queue can fill up if all workers are busy
         int prefetchCount = 1;
         channel.basicQos(prefetchCount);
@@ -48,30 +48,30 @@ public class PublishAdapter {
         while (true) {
           QueueingConsumer.Delivery delivery = consumer.nextDelivery();
           String message = new String(delivery.getBody());    
-          System.out.println(" [x] PublishAdapter received '" + message + "'");
-          JSONObject jsobj = new JSONObject(message);
-          //execute some business logic to decide whether or not to publish to PubNub
-          if (needToPublish(jsobj.getDouble("Amount")))
-          {
-        	System.out.println(" [*] PublishAdapter Amount of " + jsobj.getDouble("Amount") + " exceeds " + threshold + " so attempting to publish to PubNub");
-        	try {
+          System.out.println(" [x] PublishAdapter : received '" + message + "'");
+          try {
+        	JSONObject jsobj = new JSONObject(message);
+            //execute some business logic to decide whether or not to publish to PubNub
+            if (needToPublish(jsobj.getDouble("Amount")))
+            {
+        	  System.out.println(" [*] PublishAdapter : forwarding, Amount (" + jsobj.getDouble("Amount") + ") exceeds threshold (" + threshold + ") so let's publish to PubNub");
 	          jsobj.put("Threshold", threshold);
 	          jsobj.append("Verifier", "PublishAdapter");
-	        } catch (JSONException e) {
-	          System.out.println(" [!] PublishAdapter error JSONException:" + e);
-	        }
-	        pubnub.publish(channelName, jsobj, new Callback(){
+	          pubnub.publish(channelName, jsobj, new Callback(){
 	          public void successCallback(String channel, Object message) {
-	            System.out.println(" [*] PublishAdapter : " + message);
+	            System.out.println(" [+] PublishAdapter : published to PubNub " + message);
 	          }
 	          public void errorCallback(String channel, PubnubError error) {
-	            System.out.println(" [!] PublishAdapter error:" + error);
+	            System.out.println(" [!] PublishAdapter : error " + error);
 	          }
 	        });
 	      }
           else
-          	System.out.println(" [-] PublishAdapter Amount of " + jsobj.getDouble("Amount") + " below " + threshold + " so will not publish to PubNub");
+          	System.out.println(" [-] PublishAdapter : discarding, Amount (" + jsobj.getDouble("Amount") + ") is below threshold (" + threshold + ") so let's not publish to PubNub");
+          }catch (JSONException e) {
+	          System.out.println(" [!] PublishAdapter : error " + e);
+	      }
           channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
       }
-    }
+}

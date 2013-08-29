@@ -76,16 +76,16 @@ Receive Message on Backend Server from the Cloud
 	{"Depositor":"Randy","Amount":123.00}
 3. Go to the SubscribeAdapter terminal and confirm that the adapter successfully subscribes to the message from PubNub and then produces the message successfully to RabbitMQ.  Note how the SubscribeAdapter appended an additional element (Verifier) to the original payload.  In this demo, we can assume that the backend servers require additional data or formatting so the adapter is able to massage the data into a consumable format.
 
-	 [x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":123,"Depositor":"Randy"}
+	 [x] SubscribeAdapter : SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":123,"Depositor":"Randy"}
 
 	 [*] SubscribeAdapter : PRODUCE : inspecting message : {"Amount":123,"Depositor":"Randy"}
 
-	 [*] SubscribeAdapter : PRODUCE : Amount is a valid positive number : 123.0
+	 [*] SubscribeAdapter : PRODUCE : verified Amount: 123.0
 
-	 [+] SubscribeAdapter produced to task_queue_inbound_durable '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}'
+	 [+] SubscribeAdapter : PRODUCE : produced to task_queue_inbound_durable '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}'
 4. Go to the Consumer terminal and confirm that the backend server consumed the message successfully from RabbitMQ
 
-	 [x] Consumer received '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}'
+	 [x] Consumer : received '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}'
 5. Rinse, Lather, Repeat.
 6. Optionally, publish a message with a missing, negative, or non-numeric Amount field.  Note how it is received on the SubscribeAdapter but our demo's business logic will decide to discard the message rather than producing a message to RabbitMQ.
 
@@ -99,7 +99,7 @@ Receive Message on Backend Server from the Cloud
 
 	[*] SubscribeAdapter : PRODUCE : inspecting message : {"text":"hey","Amount":-123}
 
-	[-] SubscribeAdapter : PRODUCE : invalid Amount element in message : {"text":"hey","Amount":-123}
+	[-] SubscribeAdapter : PRODUCE : discarding due to invalid Amount in {"Amount":-123,"Depositor":"Randy"}
 7. Optionally, try closing the RabbitMQ message consumer from Step 1 and performing steps 2 through 5.  Then at some point perform step 1 to see how messages can still be successfully delivered even in the case of availability issues with your back-end servers.
 8. Optionally, try opening up several RabbitMQ message consumers to see how RabbitMQ can distribute the workload across several backend servers
 
@@ -110,14 +110,14 @@ Receive Message in the Cloud from Backend Server
 
 	\> java -cp "./*" com.pubnub.examples.Producer
 
-	[x] Producer sent '{"Depositor":"Randy","Amount":"1000000.01"}'
+	[x] Producer : sent '{"Depositor":"Randy","Amount":"1000000.01"}'
 3. Go to the PublishAdapter terminal and confirm that the adapter consumes the message successfully from RabbitMQ and publishes the message successfully to PubNub
 
-	 [x] PublishAdapter received '{"Depositor":"Randy","Amount":"1000000.01"}'
+	 [x] PublishAdapter : received '{"Depositor":"Randy","Amount":"1000000.01"}'
 
-	 [*] PublishAdapter Amount of 1000000.01 exceeds 1000000.0 so attempting to publish to PubNub
+	 [*] PublishAdapter : verified Amount (1000000.01) exceeds threshold (1000000.0) so let's publish to PubNub
 
-	 [+] PublishAdapter : [1,"Sent","13777307636386103"]
+	 [+] PublishAdapter : published to PubNub [1,"Sent","13777307636386103"]
 4. view the message on the [PubNub Dev Console](http://www.pubnub.com/console).  Note how the PublishAdapter appended additional elements (Verifier and Threshold) to the original payload.  In this demo, we can assume that the cloud clients require additional data or formatting so the adapter is able to massage the data into a coinsumable format.
 
 	{"Amount":"1000000.01", "Verifier":["PublishAdapter"], "Threshold":1000000, "Depositor":"Randy"}
@@ -129,24 +129,25 @@ Receive Message in the Cloud from Backend Server
 	
 	and here is the output from the PublishAdapter terminal
 
-	 [x] PublishAdapter received '{"Depositor":"Randy","Amount":"123"}'
+	 [x] PublishAdapter : received '{"Depositor":"Randy","Amount":"123"}'
 
-	 [-] PublishAdapter Amount of 123.0 below 1000000.0 so will not publish to PubNub
+	 [-] PublishAdapter : discarding, Amount (123.0) is below threshold (1000000.0) so let's not publish to PubNub
 6. (Optionally) Leave the SubscribeAdapter and Consumer classes running and go to those terminals to confirm that the same message sent to PubNub was also delivered all the way back down to the Consumer
 
 	For example, the SubscribeAdapter console
 
-	 [x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":"1000000.01","Verifier":["PublishAdapter"],"Threshold":1000000,"Depositor":"Randy"}
+	 [x] SubscribeAdapter : SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":"1000000.01","Verifier":["PublishAdapter"],"Threshold":1000000,"Depositor":"Randy"}
+	 
+	 [*] SubscribeAdapter : PRODUCE : inspecting message {"Amount":"1000000.01","Verifier":["PublishAdapter"],"Threshold":1000000,"Depositor":"Randy"}
+	 
+	 [*] SubscribeAdapter : PRODUCE : verified Amount: 1000000.01
+	 
+	 [+] SubscribeAdapter : PRODUCE : produced to task_queue_inbound_durable '{"Amount":"1000000.01","Verifier":["PublishAdapter","SubscribeAdapter"],"Threshold":1000000,"Depositor":"Randy"}'
 
-	 [*] SubscribeAdapter : NEEDTOPRODUCE : inspecting message : {"Amount":"1000000.01","Verifier":["PublishAdapter"],"Threshold":1000000,"Depositor":"Randy"}
-
-	 [*] SubscribeAdapter : NEEDTOPRODUCE : Amount is a valid positive number : 1000000.01
-
-	 [+] SubscribeAdapter produced to task_queue_inbound_durable '{"Amount":"1000000.01","Verifier":["PublishAdapter","SubscribeAdapter"],"Threshold":1000000,"Depositor":"Randy"}'
-
+	
 	For example, the Consumer console.  Note how Verifier element indicates that the PublishAdapter and the SubscribeAdapter had processed the message.
 
-	 [x] Consumer received '{"Amount":"1000000.01","Verifier":["PublishAdapter","SubscribeAdapter"],"Threshold":1000000,"Depositor":"Randy"}'
+	 [x] Consumer : received '{"Amount":"1000000.01","Verifier":["PublishAdapter","SubscribeAdapter"],"Threshold":1000000,"Depositor":"Randy"}'
 
 #License
 PubNub
