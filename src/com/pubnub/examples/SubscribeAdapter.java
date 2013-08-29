@@ -1,9 +1,7 @@
 package com.pubnub.examples;
 
-//import org.json.JSONArray;
-//import org.json.JSONObject;
-//import java.util.Hashtable;
-//import java.util.Scanner;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
@@ -24,12 +22,27 @@ public class SubscribeAdapter {
     	//TODO initialize constructor
     }
 
-	private void notifyUser(Object message) {
-	    System.out.println(message.toString());
-	}
+    //decide whether or not to produce message to RabbitMQ
+    private static boolean needToProduce (Object message){
+		System.out.println(" [*] SubscribeAdapter : NEEDTOPRODUCE : inspecting message : " + message);
+		//for this demo, we will produce a message to RabbitMQ onbly if we received a valid number in the Amount element of the JSON message from PubNub
+    	try {
+    		JSONObject jsobj = new JSONObject(message.toString());
+    		if (jsobj.getDouble("Amount") >= 0 ){
+    			System.out.println(" [*] SubscribeAdapter : NEEDTOPRODUCE : Amount is a valid positive number : " + jsobj.getDouble("Amount"));
+    			return true;
+    		}
+    		else{
+    			System.out.println(" [-] SubscribeAdapter : NEEDTOPRODUCE : invalid Amount element in message : " + message);
+    			return false;
+    		}
+    	} catch (JSONException ex) {
+    		System.out.println(" [!] SubscribeAdapter : NEEDTOPRODUCE : exception: " + ex);
+    		return false;
+    	}
+    }
 
-	private void notifyUser(Object message, final Channel channelRabbitMQ) {
-	    System.out.println(message.toString());
+	private void produceToRabbitMQ(Object message, final Channel channelRabbitMQ) {
         try{
             channelRabbitMQ.basicPublish( "", TASK_QUEUE_NAME,
                     MessageProperties.PERSISTENT_TEXT_PLAIN,
@@ -47,33 +60,36 @@ public class SubscribeAdapter {
     	Callback cbSubscribe = new Callback(){
             @Override
             public void connectCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : CONNECT on channel:" + channelPubNub
+            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : CONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             @Override
             public void disconnectCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : DISCONNECT on channel:" + channelPubNub
+            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : DISCONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             public void reconnectCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : RECONNECT on channel:" + channelPubNub
+            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : RECONNECT on channel:" + channelPubNub
                            + " : " + message.getClass() + " : "
                            + message.toString());
             }
 
             @Override
             public void successCallback(String channelPubNub, Object message) {
-                notifyUser(" [*] SubscribeAdapter SUBSCRIBE : " + channelPubNub + " : "
-                           + message.getClass() + " : " + message.toString(), channelRabbitMQ);
+            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:" + channelPubNub
+                        + " : " + message.getClass() + " : "
+                        + message.toString());
+                if (needToProduce( message))
+                	produceToRabbitMQ(message, channelRabbitMQ);
             }
 
             @Override
             public void errorCallback(String channelPubNub, PubnubError error) {
-                notifyUser(" [!] SubscribeAdapter SUBSCRIBE : ERROR on channel " + channelPubNub
+            	System.out.println(" [!] SubscribeAdapter SUBSCRIBE : ERROR on channel " + channelPubNub
                            + " : " + error.toString());
             }
     	};
@@ -81,7 +97,7 @@ public class SubscribeAdapter {
         try {
         	pubnub.subscribe(channelPubNub, cbSubscribe);
         } catch (Exception e) {
-        	notifyUser(" [!] SubscribeAdapter SUBSCRIBE : ERROR on channel " + channelPubNub
+        	System.out.println(" [!] SubscribeAdapter SUBSCRIBE : ERROR on channel " + channelPubNub
                     + " : " + e.toString());
         }
     }
