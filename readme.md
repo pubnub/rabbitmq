@@ -1,5 +1,6 @@
 PubNub RabbitMQ
 ==============
+#Overview
 This is an adapter layer using java to connect a RabbitMQ deployment with the PubNub real-time network.  RabbitMQ provides message broker middleware commonly used for server to server communication.  PubNub provides a real-time network to connect all cloud devices worldwide.  Connecting RabbitMQ to PubNub will take the pub/sub model of RabbitMQ and instantly extend its reach out to the cloud.
 
 The desire to extend a RabbitMQ to the cloud has usually been for publishing messages to web clients.  This demo provides an example of an adapter which can take messages off of the queue, inspect the message, and decide whether or not it should be published to web clients.  This could be a unicast model where it is intended for s certain user or it could be broadcasted out to a large group.  
@@ -9,21 +10,13 @@ The desire to take messages from the web and add them to RabbitMQ has not been a
 This demo provides an elegant, robust, and secure way to connect RabbitMQ with web users with minimal changes.  
 
 *No changes to RabbitMQ - The adapters will take care of consuming messages from RabbitMQ to publish to PubNub, and subscribing to PubNub to produce messages to RabbitMQ.  As far as RabbitMQ is concerned, the adapters are just another producer and another consumer.
-
 *No changes to Backend Servers - The backend servers will continue to communicate with RabbitMQ and it will be business as usual.  They just send and receive messags without having to know the end-point on the web. 
-
 *No changes to Firewall - The adapters will pub/sub to PubNub over standard web ports (80 nand 443).  There are no arbitrary or special ports to manage. 
-
 *Flexibility - The adapters can contain business logic to determine how to handle the messages to and from PubNub, and this logic will be completely offloaded to the adapters.  Some examples are
-
 ** Modifying the message paylod with additional/modified/calculated data
-
 ** Converting the payload to a different format
-
 ** Analyzing the payload for security threats or invalid/incomplete data
-
 ** Determining which channel to direct the message to
-
 ** Determining whether to move the message forward or to discard it
 
 #Installation
@@ -32,7 +25,6 @@ This demo assumes that you have a working RabbitMQ installation using java.  Thi
 Once the two tutorials are working, you can plug in PubNub's adapter to connect your pub/sub model behind the firewall with PubNub's real-time network.  
 
 1. [PubNub libraries](https://github.com/pubnub/rabbitmq/tree/master/lib) - drop the required PubNub java libraries into the directory you used for the RabbitMQ tutorials
-
 2. [Adapter jar file](https://github.com/pubnub/rabbitmq/blob/master/jar/PubNub-RabbitMQ.jar) - drop the RabbitMQ adapter jar file into the directory you used for the RabbitMQ tutorials
 
 #Description
@@ -42,13 +34,9 @@ The adapters connect the RabbitMQ queue/exchange with PubNub.  One adapter will 
 
 This is a good time to define the various components:
 * RabbitMQ - The middleware layer incorporating the message exchange and queue to handle delivery of messages.  The message exchange/broker/queue are all referred to together as RabbitMQ for the purposes of this demo
-
 * [Producer](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/Producer.java) - The backend server which produces messages to RabbitMQ.  This modifies [NewTask.java](https://github.com/rabbitmq/rabbitmq-tutorials/blob/master/java/NewTask.java) from the RabbitMQ tutorial two java by changing the RabbitMQ channel name defined in the variable TASK_QUEUE_NAME.  
-
 * [Consumer](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/Consumer.java) - The backend server which consumes messages from RabbitMQ.  This modifies [Worker.java](https://github.com/rabbitmq/rabbitmq-tutorials/blob/master/java/NewTask.java) from the RabbitMQ tutorial two java by changing the RabbitMQ channel name defined in the variable TASK_QUEUE_NAME.  
-
 * [SubscribeAdapter](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/SubscribeAdapter.java) - The PubNub adapter which subscribes to messages from PubNub and produces messages to RabbitMQ.
-
 * [PublishAdapter](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/SubscribeAdapter.java) - The PubNub adapter which consumes messages from RabbitMQ and then publishes messages to PubNub.
 
 You can see the following workflow in [this diagram](https://github.com/pubnub/rabbitmq/tree/master/docs/RabbitMQ-Adapter-Workflow.pdf) 
@@ -56,21 +44,15 @@ You can see the following workflow in [this diagram](https://github.com/pubnub/r
 Backend Server Publishes to PubNub through RabbitMQ:
 
 1. Producer ------> Produces Message ------> RabbitMQ
-
 2. RabbitMQ ------> Distributes Message ------> PublishAdapter
-
 3. PublishAdapter <-----> Inspects Message <-----> Applies Business Logic
-
 4. PublishAdapter ------> Publishes Message------> PubNub
 
 Backend Server Subscribes to PubNub through RabbitMQ:
 
 1. SubscribeAdapter <------ Subscribes to Message <------ PubNub
-
 2. Applies Business Logic <-----> Inspects Message <-----> SubscribeAdapter
-
 3. RabbitMQ <------ Produces Message <----- SubscribeAdapter
-
 4. Consumer <------ Distributes Message <------ RabbitMQ
 
 #Getting Started
@@ -79,11 +61,9 @@ Initialize environment
 1. Start RabbitMQ Server
 
 	\> rabbitmq-server
-
 2. Start PubNub-RabbitMQ adapters in their own terminals from the directory you used for the RabbitMQ tutorials 
 
 	\> java -cp "./*" com.pubnub.examples.SubscribeAdapter
-
 	\> java -cp "./*" com.pubnub.examples.PublishAdapter 
 
 Receive Message on Backend Server from the Cloud
@@ -91,11 +71,9 @@ Receive Message on Backend Server from the Cloud
 1. Start the RabbitMQ message consumer
 
 	\> java -cp "./*" com.pubnub.examples.Consumer
-
 2. Publish a message on the [PubNub Dev Console](http://www.pubnub.com/console) on channel 'rabbitWorker' using publish key 'demo'.  For this demo, the message should be vslid JSON containing an element named 'Amount'
 
 	{"Depositor":"Randy","Amount":123.00}
-
 3. Go to the SubscribeAdapter terminal and confirm that the adapter successfully subscribes to the message from PubNub and then produces the message successfully to RabbitMQ.  Note how the SubscribeAdapter appended an additional element (Verifier) to the original payload.  In this demo, we can assume that the backend servers require additional data or formatting so the adapter is able to massage the data into a consumable format.
 
 	 [x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":123,"Depositor":"Randy"}
@@ -105,13 +83,10 @@ Receive Message on Backend Server from the Cloud
 	 [*] SubscribeAdapter : PRODUCE : Amount is a valid positive number : 123.0
 
 	 [+] SubscribeAdapter produced to task_queue_inbound_durable '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}'
-
 4. Go to the Consumer terminal and confirm that the backend server consumed the message successfully from RabbitMQ
 
 	 [x] Consumer received '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}'
-
 5. Rinse, Lather, Repeat.
-
 6. Optionally, publish a message with a missing, negative, or non-numeric Amount field.  Note how it is received on the SubscribeAdapter but our demo's business logic will decide to discard the message rather than producing a message to RabbitMQ.
 
 	for example, here is an Amount element which is a negative number
@@ -125,21 +100,17 @@ Receive Message on Backend Server from the Cloud
 	[*] SubscribeAdapter : PRODUCE : inspecting message : {"text":"hey","Amount":-123}
 
 	[-] SubscribeAdapter : PRODUCE : invalid Amount element in message : {"text":"hey","Amount":-123}
- 
 7. Optionally, try closing the RabbitMQ message consumer from Step 1 and performing steps 2 through 5.  Then at some point perform step 1 to see how messages can still be successfully delivered even in the case of availability issues with your back-end servers.
-
 8. Optionally, try opening up several RabbitMQ message consumers to see how RabbitMQ can distribute the workload across several backend servers
 
 Receive Message in the Cloud from Backend Server
 
 1. Open the [PubNub Dev Console](http://www.pubnub.com/console) and subscribe to channel 'rabbitWorker' using subscribe key 'demo' 
-
 2. Start the RabbitMQ message producer
 
 	\> java -cp "./*" com.pubnub.examples.Producer
 
 	[x] Producer sent '{"Depositor":"Randy","Amount":"1000000.01"}'
-
 3. Go to the PublishAdapter terminal and confirm that the adapter consumes the message successfully from RabbitMQ and publishes the message successfully to PubNub
 
 	 [x] PublishAdapter received '{"Depositor":"Randy","Amount":"1000000.01"}'
@@ -147,11 +118,9 @@ Receive Message in the Cloud from Backend Server
 	 [*] PublishAdapter Amount of 1000000.01 exceeds 1000000.0 so attempting to publish to PubNub
 
 	 [+] PublishAdapter : [1,"Sent","13777307636386103"]
-
 4. view the message on the [PubNub Dev Console](http://www.pubnub.com/console).  Note how the PublishAdapter appended additional elements (Verifier and Threshold) to the original payload.  In this demo, we can assume that the cloud clients require additional data or formatting so the adapter is able to massage the data into a coinsumable format.
 
 	{"Amount":"1000000.01", "Verifier":["PublishAdapter"], "Threshold":1000000, "Depositor":"Randy"}
-
 5. (Optionally) produce a message with a missing, negative, non-numeric, or smaller-than-one-million Amount field.  Note how it is received on the SubscribeAdapter but our demo's business logic will decide to discard the message rather than publish to PubNub.  Our SubscribeAdapter's business logic decides that any messsage with an Amount greater than one million should be published to the cloud, and all other messages should be discarded.
 
 	for example, here is an Amount element which is less than one million
@@ -163,10 +132,9 @@ Receive Message in the Cloud from Backend Server
 	 [x] PublishAdapter received '{"Depositor":"Randy","Amount":"123"}'
 
 	 [-] PublishAdapter Amount of 123.0 below 1000000.0 so will not publish to PubNub
-
 6. (Optionally) Leave the SubscribeAdapter and Consumer classes running and go to those terminals to confirm that the same message sent to PubNub was also delivered all the way back down to the Consumer
 
-	For example, in SubscribeAdapter console
+	For example, the SubscribeAdapter console
 
 	 [x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":"1000000.01","Verifier":["PublishAdapter"],"Threshold":1000000,"Depositor":"Randy"}
 
@@ -176,7 +144,7 @@ Receive Message in the Cloud from Backend Server
 
 	 [+] SubscribeAdapter produced to task_queue_inbound_durable '{"Amount":"1000000.01","Verifier":["PublishAdapter","SubscribeAdapter"],"Threshold":1000000,"Depositor":"Randy"}'
 
-	For example, in Consumer console.  Note how Verifier element indicates that the PublishAdapter and the SubscribeAdapter had processed the message.
+	For example, the Consumer console.  Note how Verifier element indicates that the PublishAdapter and the SubscribeAdapter had processed the message.
 
 	 [x] Consumer received '{"Amount":"1000000.01","Verifier":["PublishAdapter","SubscribeAdapter"],"Threshold":1000000,"Depositor":"Randy"}'
 
