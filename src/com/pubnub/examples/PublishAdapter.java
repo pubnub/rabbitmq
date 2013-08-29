@@ -56,7 +56,7 @@ public class PublishAdapter {
         	System.out.println(" [*] PublishAdapter Amount of " + jsobj.getDouble("Amount") + " exceeds " + threshold + " so attempting to publish to PubNub");
         	try {
 	          jsobj.put("Threshold", threshold);
-	          jsobj.put("Verifier", "PublishAdapter");
+	          jsobj.append("Verifier", "PublishAdapter");
 	        } catch (JSONException e) {
 	          System.out.println(" [!] PublishAdapter error JSONException:" + e);
 	        }
@@ -70,7 +70,7 @@ public class PublishAdapter {
 	        });
 	      }
           else
-          	System.out.println(" [*] PublishAdapter Amount of " + jsobj.getDouble("Amount") + " below " + threshold + " so will not publish to PubNub");
+          	System.out.println(" [-] PublishAdapter Amount of " + jsobj.getDouble("Amount") + " below " + threshold + " so will not publish to PubNub");
           channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         }
       }

@@ -1,7 +1,6 @@
 package com.pubnub.examples;
 
 import org.json.JSONObject;
-import org.json.JSONException;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
@@ -22,39 +21,27 @@ public class SubscribeAdapter {
     	//TODO initialize constructor
     }
 
-    //decide whether or not to produce message to RabbitMQ
-    private static boolean needToProduce (Object message){
-		System.out.println(" [*] SubscribeAdapter : NEEDTOPRODUCE : inspecting message : " + message);
-		//for this demo, we will produce a message to RabbitMQ onbly if we received a valid number in the Amount element of the JSON message from PubNub
+    private void Produce (Object message, final Channel channelRabbitMQ){
+		System.out.println(" [*] SubscribeAdapter : PRODUCE : inspecting message : " + message);
     	try {
+    		//for this demo, we will produce a message to RabbitMQ onbly if we received a valid number in the Amount element of the JSON message from PubNub
     		JSONObject jsobj = new JSONObject(message.toString());
     		if (jsobj.getDouble("Amount") >= 0 ){
-    			System.out.println(" [*] SubscribeAdapter : NEEDTOPRODUCE : Amount is a valid positive number : " + jsobj.getDouble("Amount"));
-    			return true;
+    			System.out.println(" [*] SubscribeAdapter : PRODUCE : Amount is a valid positive number : " + jsobj.getDouble("Amount"));
+    			jsobj.append("Verifier", "SubscribeAdapter");
+    			channelRabbitMQ.basicPublish( "", TASK_QUEUE_NAME,
+                        MessageProperties.PERSISTENT_TEXT_PLAIN,
+                        jsobj.toString().getBytes());
+                System.out.println(" [+] SubscribeAdapter produced to " + 
+                        TASK_QUEUE_NAME + " '" + jsobj.toString() + "'");
     		}
     		else{
-    			System.out.println(" [-] SubscribeAdapter : NEEDTOPRODUCE : invalid Amount element in message : " + message);
-    			return false;
+    			System.out.println(" [-] SubscribeAdapter : PRODUCE : invalid Amount element in message : " + message);
     		}
-    	} catch (JSONException ex) {
-    		System.out.println(" [!] SubscribeAdapter : NEEDTOPRODUCE : exception: " + ex);
-    		return false;
+    	} catch (Exception e) {
+    		System.out.println(" [!] SubscribeAdapter : PRODUCE : exception: " + e);
     	}
     }
-
-	private void produceToRabbitMQ(Object message, final Channel channelRabbitMQ) {
-        try{
-            channelRabbitMQ.basicPublish( "", TASK_QUEUE_NAME,
-                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                    message.toString().getBytes());
-            System.out.println(" [x] SubscribeAdapter produced to " + 
-                    TASK_QUEUE_NAME + " '" + message.toString() + "'");
-        }
-        catch (Exception e){
-        	System.out.println(" [!] SubscribeAdapter error" + e);
-        }
-	    
-	}
 	
     private void subscribe(final String channelPubNub, final Channel channelRabbitMQ) {
     	Callback cbSubscribe = new Callback(){
@@ -80,11 +67,10 @@ public class SubscribeAdapter {
 
             @Override
             public void successCallback(String channelPubNub, Object message) {
-            	System.out.println(" [*] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:" + channelPubNub
+            	System.out.println(" [x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:" + channelPubNub
                         + " : " + message.getClass() + " : "
                         + message.toString());
-                if (needToProduce( message))
-                	produceToRabbitMQ(message, channelRabbitMQ);
+                Produce(message, channelRabbitMQ);
             }
 
             @Override
