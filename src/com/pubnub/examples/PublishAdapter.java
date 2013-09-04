@@ -58,20 +58,20 @@ public class PublishAdapter {
 	          jsobj.put("Threshold", threshold);
 	          jsobj.append("Verifier", "PublishAdapter");
 	          pubnub.publish(channelName, jsobj, new Callback(){
-	          public void successCallback(String channel, Object message) {
-	            System.out.println(" [+] PublishAdapter : published to PubNub " + message);
-	          }
-	          public void errorCallback(String channel, PubnubError error) {
-	            System.out.println(" [!] PublishAdapter : error " + error);
-	          }
-	        });
-	      }
-          else
-          	System.out.println(" [-] PublishAdapter : discarding, Amount (" + jsobj.getDouble("Amount") + ") is below threshold (" + threshold + ") so let's not publish to PubNub");
-          }catch (JSONException e) {
+	            public void successCallback(String channel, Object message) {
+	              System.out.println(" [+] PublishAdapter : published to PubNub " + message);
+	            }
+	            public void errorCallback(String channel, PubnubError error) {
+	              System.out.println(" [!] PublishAdapter : error " + error);
+	            }
+	          });
+	        }
+            else
+          	  System.out.println(" [-] PublishAdapter : discarding, Amount (" + jsobj.getDouble("Amount") + ") is below threshold (" + threshold + ") so let's not publish to PubNub");
+            }catch (JSONException e) {
 	          System.out.println(" [!] PublishAdapter : error " + e);
-	      }
-          channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-        }
-      }
+	        }
+            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+          }
+    }
 }
