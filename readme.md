@@ -27,9 +27,9 @@ This demo assumes that you have a working RabbitMQ installation using java.  For
 
 Once the two tutorials are working, you can plug in PubNub's adapter to connect your RabbitMQ deployment with PubNub's real-time network. 
 
-1. [Adapter jar and libraries](https://github.com/pubnub/rabbitmq/tree/master/zip/pubnub-rabbitmq.zip) - download this zip file which contains the PubNub-RabbitMQ.jar file as well as required jar files for PubNub's java SDK and RabbitMQ's java SDK
-2. Unzip pubnub-rabbitmq.zip into your desired location
-3. Follow the steps in the Getting Started section below
+1. [Adapter jar and libraries](https://github.com/pubnub/rabbitmq/tree/master/zip/pubnub-rabbitmq.zip) - download this zip file which contains the PubNub-RabbitMQ.jar file as well as required jar files for PubNub's java SDK and RabbitMQ's java SDK 
+2. Unzip pubnub-rabbitmq.zip into your desired location 
+3. Follow the steps in the Getting Started section below 
 
 
 ##Getting Started
@@ -37,75 +37,48 @@ Once the two tutorials are working, you can plug in PubNub's adapter to connect 
 ###Initialize environment 
 
 1. Start RabbitMQ Server 
-
 ``` 
 \> rabbitmq-server 
 ``` 
-
 2. Start PubNub-RabbitMQ adapters in their own terminals from the directory you used for the RabbitMQ tutorials 
-
 ``` 
 	\> java -cp "./*" com.pubnub.examples.SubscribeAdapter 
-
 	\> java -cp "./*" com.pubnub.examples.PublishAdapter 
 ``` 
-
 ###Receive Message on Backend Server from the Cloud
 
 1. Start the RabbitMQ message consumer 
-
 ``` 
 	\> java -cp "./*" com.pubnub.examples.Consumer 
 ``` 
-
 2. Publish a message on the [PubNub Dev Console](http://www.pubnub.com/console) on channel 'rabbitWorker' using publish key 'demo'.  For this demo, the message should be valid JSON containing an element named 'Amount' 
-
 ``` 
 	{"Depositor":"Randy","Amount":123.00} 
 ```  
-
 3. Switch to the SubscribeAdapter terminal and confirm that the adapter successfully subscribes to the message from PubNub and then produces the message successfully to RabbitMQ.  Note how the SubscribeAdapter appended an additional element (Verifier) to the original payload.  This demonstrates how we can handle cases where backend servers require additional data or formatting by using the adapter to massage the data into a consumable format. 
-
 ``` 
-
 	 [x] SubscribeAdapter : SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":123,"Depositor":"Randy"} 
-
 	 [*] SubscribeAdapter : PRODUCE : inspecting message : {"Amount":123,"Depositor":"Randy"} 
-
 	 [*] SubscribeAdapter : PRODUCE : verified Amount: 123.0 
-
 	 [+] SubscribeAdapter : PRODUCE : produced to task_queue_inbound_durable '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}' 
 ``` 
-
 4. Go to the Consumer terminal and confirm that the backend server consumed the message successfully from RabbitMQ 
-
 ``` 
-
 	 [x] Consumer : received '{"Amount":123,"Verifier":["SubscribeAdapter"],"Depositor":"Randy"}' 
 ``` 
-
 5. Rinse, Lather, Repeat.  We have now taken a message from the cloud, qualified it as worthy to send forward, reformatted it, and sent it to a backend server through RabbitMQ. (Scary or Exciting?) 
-
 6. Optionally, publish a message with a missing, negative, or non-numeric Amount field.  Note how it is received on the SubscribeAdapter but our business logic will discard the invalid message rather than burden RabbitMQ. 
-
 	for example, here is a negative Amount
 ``` 
-
 	{"Depositor":"Randy","Amount":-123.00} 
 ``` 
-
 	which triggers the following messages in the PublishAdapter terminal 
 ``` 
-
 	[x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"text":"hey","Amount":-123} 
-
 	[*] SubscribeAdapter : PRODUCE : inspecting message : {"text":"hey","Amount":-123} 
-
 	[-] SubscribeAdapter : PRODUCE : discarding due to invalid Amount in {"Amount":-123,"Depositor":"Randy"} 
 ``` 
-
 7. Optionally, perform steps 2 through 5 after stopping the Consumer from Step 1 in order to verify that the resiliency of RabbitMQ remains intact even with backend servers going down. 
-
 8. Optionally, open several RabbitMQ message consumers to see how RabbitMQ distributes the workload across several backend servers. 
 
 ###Receive Message in the Cloud from Backend Server 
@@ -129,7 +102,6 @@ Once the two tutorials are working, you can plug in PubNub's adapter to connect 
 ```  
 	{"Amount":"1000000.01", "Verifier":["PublishAdapter"], "Threshold":1000000, "Depositor":"Randy"}
 ``` 
-
 5. (Optionally) Produce a message with a missing, negative, non-numeric, or smaller-than-one-million Amount field.  Note how it is received on the SubscribeAdapter but our business logic will discard the message.  Our SubscribeAdapter's business logic only publishes messsages to the cloud if the Amount is greater than one million. 
 
 	for example, here is an Amount less than one million with the message supplied as an argument in quotes and the quotes within the message escaped with a backslash.
@@ -141,13 +113,10 @@ Once the two tutorials are working, you can plug in PubNub's adapter to connect 
 	 [x] PublishAdapter : received '{"Depositor":"Randy","Amount":"123"}' 
 	 [-] PublishAdapter : discarding, Amount (123.0) is below threshold (1000000.0) so let's not publish to PubNub 
 ``` 
-
 6. (Optionally) Leave the SubscribeAdapter and Consumer classes running and switch to those terminals to confirm that the same message published to PubNub was also delivered all the way back down to the Consumer 
-
 	For example, the SubscribeAdapter console 
 ``` 
 	 [x] SubscribeAdapter : SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"Amount":"1000000.01","Verifier":["PublishAdapter"],"Threshold":1000000,"Depositor":"Randy"} 
-
 	 [*] SubscribeAdapter : PRODUCE : inspecting message {"Amount":"1000000.01","Verifier":["PublishAdapter"],"Threshold":1000000,"Depositor":"Randy"} 
 	 [*] SubscribeAdapter : PRODUCE : verified Amount: 1000000.01 
 	 [+] SubscribeAdapter : PRODUCE : produced to task_queue_inbound_durable '{"Amount":"1000000.01","Verifier":["PublishAdapter","SubscribeAdapter"],"Threshold":1000000,"Depositor":"Randy"}' 
