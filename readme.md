@@ -54,15 +54,15 @@ Once the two tutorials are working, you can plug in PubNub's adapter to connect 
 
 1. Start the RabbitMQ message consumer 
 
-```
+``` 
 	\> java -cp "./*" com.pubnub.examples.Consumer 
-```
+``` 
 
 2. Publish a message on the [PubNub Dev Console](http://www.pubnub.com/console) on channel 'rabbitWorker' using publish key 'demo'.  For this demo, the message should be valid JSON containing an element named 'Amount' 
 
-```
-	{"Depositor":"Randy","Amount":123.00} 
 ``` 
+	{"Depositor":"Randy","Amount":123.00} 
+```  
 
 3. Switch to the SubscribeAdapter terminal and confirm that the adapter successfully subscribes to the message from PubNub and then produces the message successfully to RabbitMQ.  Note how the SubscribeAdapter appended an additional element (Verifier) to the original payload.  This demonstrates how we can handle cases where backend servers require additional data or formatting by using the adapter to massage the data into a consumable format. 
 
@@ -94,7 +94,7 @@ Once the two tutorials are working, you can plug in PubNub's adapter to connect 
 	{"Depositor":"Randy","Amount":-123.00} 
 ``` 
 
-	which triggers the following messages in the PublishAdapter terminal
+	which triggers the following messages in the PublishAdapter terminal 
 ``` 
 
 	[x] SubscribeAdapter SUBSCRIBE : RECEIVED on channel:rabbitWorker : class org.json.JSONObject : {"text":"hey","Amount":-123} 
