@@ -8,20 +8,11 @@ The desire to extend a RabbitMQ to the cloud has typically been to publish messa
 The flipside would be to subscribe to messages from web clients and push them to servers behind RabbitMQ.  This would take the model one step further and allow for bi-directional communication in real-time.  The desire to take messages from the web and add them to RabbitMQ has not been as prevalent as there had been no secure, flexible, and effective way to accomplish this.  However, this demo will show how easy and elegant it can be to instantly add this new class of use cases with no disruption to clients or servers and no buildout required. 
 
 ##Description
-This adapter demo takes the two class files from the second RabbitMQ java tutorial and changes the channel name so that the message producer (formerly NewTask.java) and message consumer (formerly (Worker.java) use different channels.  That is really the only change required to the RabbitMQ classes.  As far as your backend servers are concerned, they are just producing and consuming messages to/from RabbitMQ as usual, with no notion of the perils of the internet. 
+This demo takes the two class files from the second RabbitMQ java tutorial and changes the channel name so that the message producer (formerly NewTask.java) and message consumer (formerly (Worker.java) use different channels.  That is really the only change required to the RabbitMQ classes.  As far as your backend servers are concerned, they are just producing and consuming messages to/from RabbitMQ as usual, with no notion of the perils of the internet. 
 
 The adapters will connect the RabbitMQ queue/exchange with PubNub over standard http ports 80 and 443.  One adapter will take messages from the queue and publish them to PubNub.  The other adapter will take messages from PubNub and send them to RabbitMQ.  both of these adapters provide examples of business logic to inspect messages and decide whether they should be discarded or sent forward. 
 
-##Installation
-This demo assumes that you have a working RabbitMQ installation using java.  For the purposes of this demo, you can simply follow the [RabbitMQ tutorial one java](http://www.rabbitmq.com/tutorials/tutorial-one-java.html) and [RabbitMQ tutorial two java](http://www.rabbitmq.com/tutorials/tutorial-two-java.html) to make sure you have a bare-bones environment. 
-
-Once the two tutorials are working, you can plug in PubNub's adapter to connect your pub/sub model behind the firewall with PubNub's real-time network. 
-
-1. [Adapter jar and libraries](https://github.com/pubnub/rabbitmq/tree/master/zip/pubnub-rabbitmq.zip) - download and unzip into the directory you used for the RabbitMQ tutorials
-2. Open a command prompt/terminal window to set the classpath and execute class files from PubNub-RabbitMQ.jar
-3. Follow the steps in the Getting Started section below
-
-###Component Definition
+##Component Definition
 This is a good time to define the various components: 
 
 * RabbitMQ - The middleware layer incorporating the message exchange and queue to handle delivery of messages.  The message exchange/broker/queue are all referred to together as RabbitMQ for the purposes of this demo 
@@ -30,6 +21,17 @@ This is a good time to define the various components:
 * [SubscribeAdapter](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/SubscribeAdapter.java) - The PubNub adapter which subscribes to messages from PubNub and produces qualified messages to RabbitMQ. 
 * [PublishAdapter](https://github.com/pubnub/rabbitmq/blob/master/src/com/pubnub/examples/SubscribeAdapter.java) - The PubNub adapter which consumes messages from RabbitMQ and then publishes qualified messages to PubNub. 
 * Cloud Client - Any client communicating over tcp port 80 (or optionally 443 for ssl).  This will be the client out in the cloud that we have now extended RabbitMQ's reach to.  This client can possibly be a web page using PubNub's javascript SDK, a client app using one of PubNub's sdk's (ie java, javascript, iOS, android, etc), or an app issuing simple REST API calls.  Our example just uses PubNub's [Dev console](http://www.pubnub.com/console) to demonstrate inbound and outbound messages.
+
+##Installation
+This demo assumes that you have a working RabbitMQ installation using java.  For the purposes of this demo, you can simply follow the [RabbitMQ tutorial one java](http://www.rabbitmq.com/tutorials/tutorial-one-java.html) and [RabbitMQ tutorial two java](http://www.rabbitmq.com/tutorials/tutorial-two-java.html) to make sure you have a bare-bones environment. 
+
+Once the two tutorials are working, you can plug in PubNub's adapter to connect your RabbitMQ deployment with PubNub's real-time network. 
+
+1. [Adapter jar and libraries](https://github.com/pubnub/rabbitmq/tree/master/zip/pubnub-rabbitmq.zip) - download this zip file which contains the PubNub-RabbitMQ.jar file as well as required jar files for PubNub's java SDK and RabbitMQ's java SDK
+2. Unzip pubnub-rabbitmq.zip into your desired location
+3. Open a command prompt/terminal window
+3. Follow the steps in the Getting Started section below
+
 
 ##Getting Started
 
