@@ -1,6 +1,8 @@
 #PubNub RabbitMQ
 
 ##Overview
+See [blog post](http://www.pubnub.com/blog/extend-rabbitmq-into-mobile-and-web-using-pubnub/) for more details
+
 This is an adapter layer using java to connect a RabbitMQ deployment with web users through the PubNub real-time network.  RabbitMQ provides message broker middleware commonly used for server to server communication.  PubNub provides a real-time network to connect any cloud devices worldwide.  Combining RabbitMQ with PubNub takes RabbitMQ and instantly extend its reach out to the cloud.
 
 The desire to extend a RabbitMQ to the cloud has typically been to publish messages to web clients.  One part of this demo provides an example of an adapter which takes messages off of a RabbitMQ queue, inspects the message, and decides whether or not it should be published to web clients.
