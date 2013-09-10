@@ -27,7 +27,7 @@ This demo assumes that you have a working RabbitMQ installation using java.  For
 
 Once the two tutorials are working, you can plug in PubNub's adapter to connect your RabbitMQ deployment with PubNub's real-time network. 
 
-1. [Adapter jar and libraries](https://github.com/pubnub/rabbitmq/tree/master/zip/pubnub-rabbitmq.zip) - download this zip file which contains the PubNub-RabbitMQ.jar file as well as required jar files for PubNub's java SDK and RabbitMQ's java SDK 
+1. [Adapter jar and libraries](http://pubnub-randeep.s3.amazonaws.com/pubnub-rabbitmq.zip) - download this zip file which contains the PubNub-RabbitMQ.jar file as well as required jar files for PubNub's java SDK and RabbitMQ's java SDK 
 2. Unzip pubnub-rabbitmq.zip into your desired location 
 3. Follow the steps in the Getting Started section below 
 
