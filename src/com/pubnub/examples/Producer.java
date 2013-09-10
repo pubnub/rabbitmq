@@ -42,7 +42,7 @@ public class Producer {
 
   private static String getMessage(String[] strings){
     if (strings.length < 1)
-      return "{\"Depositor\":\"Randy\",\"Amount\":\"1000000.01\"}";
+      return "{\"Depositor\":\"Randy\",\"Amount\":1000000.01}";
     return joinStrings(strings, " ");
   }
 

@@ -88,7 +88,7 @@ Once the two tutorials are working, you can plug in PubNub's adapter to connect 
 ``` 
 	\> java -cp "./*" com.pubnub.examples.Producer 
 
-	[x] Producer : sent '{"Depositor":"Randy","Amount":"1000000.01"}' 
+	[x] Producer : sent '{"Depositor":"Randy","Amount":1000000.01}' 
 ```
 3. Go to the PublishAdapter terminal and confirm that the adapter consumes the message successfully from RabbitMQ, validates the message, and publishes successfully to PubNub 
 ``` 
@@ -106,11 +106,11 @@ Once the two tutorials are working, you can plug in PubNub's adapter to connect 
 
 	for example, here is an Amount less than one million with the message supplied as an argument in quotes and the quotes within the message escaped with a backslash.
 ``` 
-	\> java -cp "./*" com.pubnub.examples.Producer "{\"Depositor\":\"Randy\",\"Amount\":\"123\"}" 
+	\> java -cp "./*" com.pubnub.examples.Producer "{\"Depositor\":\"Randy\",\"Amount\":123}" 
 ``` 	
 	which generates the following output in the PublishAdapter terminal
 ``` 
-	 [x] PublishAdapter : received '{"Depositor":"Randy","Amount":"123"}' 
+	 [x] PublishAdapter : received '{"Depositor":"Randy","Amount":123}' 
 	 [-] PublishAdapter : discarding, Amount (123.0) is below threshold (1000000.0) so let's not publish to PubNub 
 ``` 
 6. (Optionally) Leave the SubscribeAdapter and Consumer classes running and switch to those terminals to confirm that the same message published to PubNub was also delivered all the way back down to the Consumer 
